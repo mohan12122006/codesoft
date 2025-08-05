@@ -1,0 +1,48 @@
+# Step 1: Install and Import Libraries
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Step 2: Download and Load the Dataset
+!wget https://raw.githubusercontent.com/sundeepblue/movie_rating_prediction/master/movie_metadata.csv -O movies.csv
+
+# Step 3: Preprocess the Dataset
+df = pd.read_csv('movies.csv')
+
+# Keep only relevant columns
+df = df[['movie_title', 'genres', 'plot_keywords']]
+df.dropna(inplace=True)
+
+# Combine genres and plot_keywords into a single feature
+df['content'] = df['genres'] + ' ' + df['plot_keywords']
+df = df[['movie_title', 'content']]
+df.rename(columns={'movie_title': 'title'}, inplace=True)
+
+# Optional: Remove extra spaces
+df['title'] = df['title'].str.strip()
+
+# Step 4: Convert Content to TF-IDF Feature Matrix
+tfidf = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf.fit_transform(df['content'])
+
+# Step 5: Compute Cosine Similarity
+cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+# Step 6: Map Titles to Indices
+indices = pd.Series(df.index, index=df['title']).drop_duplicates()
+
+# Step 7: Recommendation Function
+def recommend(title, cosine_sim=cosine_sim):
+    if title not in indices:
+        return "Movie not found in the dataset."
+    idx = indices[title]
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[1:6]  # Top 5 similar movies
+    movie_indices = [i[0] for i in sim_scores]
+    return df['title'].iloc[movie_indices]
+
+# Step 8: Test the Recommender System
+user_input = "Avatar"  # You can change this
+print(f"Top 5 recommendations for '{user_input}':\n")
+print(recommend(user_input))

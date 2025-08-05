@@ -1,0 +1,34 @@
+import cv2
+from PIL import Image
+import numpy as np
+import gradio as gr
+
+# Download a pre-trained face detection model (Haar Cascade)
+!wget https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml -O haarcascade_frontalface_default.xml
+
+# Load the cascade classifier
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+# Define the face detection function
+def detect_faces_opencv(uploaded_image):
+    # Convert PIL Image to OpenCV format (BGR)
+    image = np.array(uploaded_image.convert("RGB"))
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+    # Detect faces
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    # Draw rectangles around the faces
+    for (x, y, w, h) in faces:
+        cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2) # Draw in blue
+
+    return Image.fromarray(image)
+
+# Launch Gradio Interface
+gr.Interface(
+    fn=detect_faces_opencv,
+    inputs=gr.Image(type="pil"),
+    outputs=gr.Image(type="pil"),
+    title="OpenCV Face Detection (Haar Cascade)",
+    description="Upload an image to detect faces using OpenCV's Haar Cascade classifier."
+).launch()

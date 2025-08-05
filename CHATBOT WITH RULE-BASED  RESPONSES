@@ -1,0 +1,32 @@
+import re
+
+def chatbot():
+    print("Bot: Hello! I'm a smart chatbot. Type 'exit' or 'bye' to end the chat.")
+
+    while True:
+        user_input = input("You: ").lower().strip()
+
+        if re.search(r'\b(exit|bye)\b', user_input):
+            print("Bot: Goodbye! Have a nice day!")
+            break
+
+        elif re.search(r'\b(hello|hi|hey)\b', user_input):
+            print("Bot: Hi there! How can I assist you today?")
+
+        elif re.search(r'\b(name|who are you)\b', user_input):
+            print("Bot: I'm ChatBot-Regex, your friendly virtual assistant.")
+
+        elif re.search(r'\bhow are you\b', user_input):
+            print("Bot: I'm doing great, thanks for asking!")
+
+        elif re.search(r'\b(help|support)\b', user_input):
+            print("Bot: I’m here to help! Tell me your issue or question.")
+
+        elif re.search(r'\bthank(s| you)\b', user_input):
+            print("Bot: You're most welcome!")
+
+        else:
+            print("Bot: Hmm, I’m not sure I understood that. Can you try saying it differently?")
+
+# Run the chatbot
+chatbot()
